@@ -53,10 +53,45 @@ class Tree
       end
     end
   end
+
+  def delete(value, root = @root)
+    if root.nil?
+      puts "Delete failed, value not contained in tree!"
+      return
+    end
+    if value > root.data
+      root.right = delete(value, root.right)
+    elsif value < root.data
+      root.left = delete(value, root.left)
+    else
+      if root.left.nil?
+        tmp = root.right
+        root = nil
+        return tmp
+      elsif root.right.nil?
+        tmp = root.left
+        root = nil
+        return tmp
+      else
+        tmp = look_min(root.right)
+        root.data = tmp.data
+        root.right = delete(tmp.data, root.right)
+      end
+    end
+    root
+  end
+
+  def look_min(root)
+    tmp = root
+    until tmp.left.nil?
+      tmp = tmp.left
+    end
+    tmp
+  end
 end
 
-tree = Tree.new([2, 5, 1, 1, 6, 7, 4, 9])
+tree = Tree.new([2, 5, 1, 1, 3, 8, 6, 7, 4, 9])
 
-tree.insert(8)
+tree.delete(3)
 
 tree.pretty_print()
