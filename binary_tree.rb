@@ -88,10 +88,133 @@ class Tree
     end
     tmp
   end
+
+  def find(value)
+    tmp = @root
+    until tmp.nil? || tmp.data == value
+      tmp = tmp.left if value < tmp.data
+      tmp = tmp.right if value > tmp.data
+    end
+    puts "Value not found." if tmp.nil?
+    tmp
+  end
+
+  def level_order
+    unless block_given?
+      arr = []
+      queue = [@root]
+      until queue.empty?
+        arr.push queue[0].data
+        queue.push queue[0].left if !queue[0].left.nil?
+        queue.push queue[0].right if !queue[0].right.nil?
+        queue.shift
+      end
+      return arr
+    end
+
+    queue = [@root]
+    until queue.empty?
+      yield queue[0]
+      queue.push queue[0].left if !queue[0].left.nil?
+      queue.push queue[0].right if !queue[0].right.nil?
+      queue.shift
+    end
+  end
+
+  def preorder(root = @root, arr = [], &block)
+    return if root.nil?
+
+    block_given? ? block.call(root) : arr.push(root.data)
+    preorder(root.left, arr, &block)
+    preorder(root.right, arr, &block)
+    arr
+  end
+
+  def inorder(root = @root, arr = [], &block)
+    return if root.nil?
+
+    inorder(root.left, arr, &block)
+    block_given? ? block.call(root) : arr.push(root.data)
+    inorder(root.right, arr, &block)
+    arr
+  end
+
+  def postorder(root = @root, arr = [], &block)
+    return if root.nil?
+
+    postorder(root.left, arr, &block)
+    postorder(root.right, arr, &block)
+    block_given? ? block.call(root) : arr.push(root.data)
+    arr
+  end
+
+  def height(root)
+    return -1 if root.nil?
+
+    left_branch = height(root.left)
+    right_branch = height(root.right)
+    return [left_branch, right_branch].max + 1
+  end
+
+  def depth(root)
+    tmp = @root
+    depth = 0
+    until tmp == root
+      tmp = tmp.left if root.data < tmp.data
+      tmp = tmp.right if root.data > tmp.data
+      depth += 1
+    end
+    depth
+  end
+
+  def balanced?
+    l = self.height(@root.left)
+    r = self.height(@root.right)
+    ([l, r].max - [l, r].min) <= 1
+  end
+
+  def rebalance
+    return if self.balanced?
+
+    arr = self.inorder
+    @root = self.build_tree(arr)
+  end
 end
 
 tree = Tree.new([2, 5, 1, 1, 3, 8, 6, 7, 4, 9])
 
-tree.delete(3)
+# tree.delete(3)
+
+# node = tree.find(6)
+
+# tree.level_order { |node| puts "My name is #{node.data}" }
+
+# p tree.level_order
+
+# tree.preorder { |node| puts "My name is #{node.data}" }
+
+# p tree.preorder
+
+# tree.inorder { |node| puts "My name isha #{node.data}" }
+
+# p tree.inorder
+
+# tree.postorder { |node| puts "My name is #{node.data}" }
+
+# p tree.postorder
+
+# p tree.height(node)
+
+# p tree.depth(node)
+
+tree.insert(10)
+
+tree.insert(11)
+
+tree.insert(12)
+
+tree.rebalance
 
 tree.pretty_print()
+
+p tree.balanced?
